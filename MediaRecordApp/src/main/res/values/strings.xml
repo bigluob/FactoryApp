@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">多媒体记录APP</string>
+    <string name="back">返回</string>
+    <string name="request_allow_permissions">申请授权</string>
+    <string name="photo">拍照</string>
+    <string name="video">录像</string>
+    <string name="qr_code">二维码</string>
+    <string name="flash_off">关闭闪光灯</string>
+    <string name="flash_on">打开闪光灯</string>
+    <string name="flash_auto">自动选择</string>
+    <string name="flash_always">总是打开闪光灯</string>
+    <string name="configuration">设置</string>
+    <string name="gallery">多媒体清单</string>
+    <string name="refresh">刷新</string>
+</resources>
