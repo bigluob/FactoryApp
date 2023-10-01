@@ -16,12 +16,11 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.camc.factory.common.AppRouter
 import com.camc.factory.common.AppRouterParams
-import com.camc.factory.ui.feature.page.CaptureScreen
+import com.camc.factory.ui.feature.page.CategoryAddEditScreen
 import com.camc.factory.ui.feature.page.CategoryScreen
 import com.camc.factory.ui.feature.page.ServerSettingsScreen
-import com.camc.factory.ui.feature.page.TodoAddEditScreen
-import com.camc.factory.ui.feature.page.TodoFileUploadScreen
 import com.camc.factory.ui.feature.page.login.LoginScreen
+import com.camc.factory.ui.feature.page.upload.ImageUploadScreen
 import com.camc.factory.ui.feature.viewmodel.CaptureViewModel
 import com.camc.factory.ui.feature.viewmodel.LoginViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -41,8 +40,6 @@ fun HomeNavHost(context: Context) {
     val captureViewModel: CaptureViewModel = viewModel()
     val loadingProgressBar = loginViewModel.progressBar.value
     val imageError = loginViewModel.imageErrorAuth.value
-
-
     AnimatedNavHost(navController, startDestination = AppRouter.Category.route) {
         composable(AppRouter.Category.route) {
             Column() {
@@ -66,35 +63,42 @@ fun HomeNavHost(context: Context) {
                 )
             }
         }
-        composable(
-            route = "${AppRouter.TakePhoto.route}/{${AppRouterParams.PAR_TODO_TITLE}}",
+       /* composable(
+            route = "${AppRouter.TakePhoto.route}/{${AppRouterParams.PAR_CATEGORY_TITLE}}",
             arguments = listOf(
-                navArgument(AppRouterParams.PAR_TODO_TITLE) {
+                navArgument(AppRouterParams.PAR_CATEGORY_TITLE) {
                     type = NavType.StringType
                 }
             )
         ) { entry ->
-            val categoryName = entry.arguments?.getString(AppRouterParams.PAR_TODO_TITLE) ?: ""
+            val categoryName = entry.arguments?.getString(AppRouterParams.PAR_CATEGORY_TITLE) ?: ""
             CaptureScreen(
                 navController,
                 categoryName,
                 captureViewModel
             )
-        }
+        }*/
 
         composable(
-            route = "${AppRouter.TodoFileUpload.route}/{${AppRouterParams.PAR_TODO_TITLE}}",
+            route = "${AppRouter.ImageFileUpload.route}/{${AppRouterParams.PAR_CATEGORY_TITLE}}",
             arguments = listOf(
-                navArgument(AppRouterParams.PAR_TODO_TITLE) {
+                navArgument(AppRouterParams.PAR_CATEGORY_TITLE) {
                     type = NavType.StringType
                 }
-            ),
+            )
         ) { entry ->
-            val todoTitle = entry.arguments?.getString(AppRouterParams.PAR_TODO_TITLE) ?: ""
-            TodoFileUploadScreen(navController, todoTitle)
+            val categoryName = entry.arguments?.getString(AppRouterParams.PAR_CATEGORY_TITLE) ?: ""
+            ImageUploadScreen(
+                navController = navController,
+                categoryName = categoryName,
+                context = context,
+                navigateBack = {
+                    navController.popBackStack() // 导航回上一页
+                }
+            )
         }
         composable(
-            AppRouter.TodoAddEdit.route,
+            AppRouter.CategoryAddEdit.route,
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentScope.SlideDirection.Left,
@@ -109,7 +113,7 @@ fun HomeNavHost(context: Context) {
             }
         ) {
             Column() {
-                TodoAddEditScreen(navController)
+                CategoryAddEditScreen(navController)
             }
         }
 

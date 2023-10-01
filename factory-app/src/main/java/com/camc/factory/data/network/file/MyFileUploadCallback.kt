@@ -1,6 +1,6 @@
 package com.camc.factory.data.network.file
 
-class MyFileUploadCallback : FileUploadCallback {
+class MyFileUploadCallback(override val progressState: Int) : FileUploadCallback {
     override fun onFileUploadSuccess() {
         // 处理文件上传成功的逻辑
         println("文件上传成功")

@@ -23,4 +23,6 @@
     <string name="login_password_label">登录密码</string>
     <string name="login_email_id_or_phone_label">登录账号</string>
     <string name="login_heading_text">系统登录</string>
+    <string name="back">返回</string>
+    <string name="gallery">图集</string>
 </resources>

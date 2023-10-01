@@ -1,6 +1,7 @@
 package com.camc.factory.ui.feature.page
 
 /*import androidx.lifecycle.observeAsState*/
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,7 +35,7 @@ import com.camc.factory.ui.feature.viewmodel.CategoryViewModel
 @Composable
 fun CategoryScreen(
     navController: NavController,
-    viewModel: CategoryViewModel = hiltViewModel()
+    viewModel: CategoryViewModel = hiltViewModel()// 添加此函数参数
 ) {
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
@@ -78,7 +79,7 @@ fun CategoryScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate(AppRouter.TodoAddEdit.route) },
+                onClick = { navController.navigate(AppRouter.CategoryAddEdit.route) },
                 modifier = Modifier.padding(bottom = 120.dp, end = 70.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
@@ -87,14 +88,18 @@ fun CategoryScreen(
     ) {
         // 显示分类列表数据
         LazyColumn {
-            itemsIndexed(categoryList) { indx, category ->
+            itemsIndexed(categoryList) { index, category ->
                 CategoryItemComponent(
                     categoryName = category.name,
                     requiredCount = category.demandRecords,
                     recordCount = category.recordedCount,
                     isUploaded = category.isUploaded,
                     onCameraClick = { navController.navigate("${AppRouter.TakePhoto.route}/${category.name}") },
-                    onUploadClick = { navController.navigate("${AppRouter.TodoFileUpload.route}/${category.name}") }
+                    onUploadClick = { navController.navigate("${AppRouter.ImageFileUpload.route}/${category.name}") },
+                    onItemClick = {
+                        // Handle item click by invoking the onCategoryItemClick callback
+                        viewModel.onCategoryItemClick?.invoke(index, category)
+                    }
                 )
             }
         }

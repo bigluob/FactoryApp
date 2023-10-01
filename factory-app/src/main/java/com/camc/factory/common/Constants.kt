@@ -1,11 +1,21 @@
 package com.camc.factory.common
 
+import android.content.Context
+import android.os.Build
+import android.os.Environment
+import java.io.File
+
 object Constants {
+
+
     //md5 加密1的结果为：c4ca4238a0b923820dcc509a6f75849b
    // const val BASE_URL = "http://192.168.18.20/appku-api/public/api/"
     const val LOGIN_URL ="http://82.157.66.177:8888/api/Login/Login/"
+
     const val SINGLE_FILE_URL ="http://82.157.66.177:8888/api/DocLib/SingleFileUpload"
+
     const val MULTI_FILE_URL ="http://82.157.66.177:8888/api/DocLib/MultiFileUpload"
+
     const val Token_key ="eyJhbGciOiJub25lIiwidHlwIjoiQmVhcmVyIn0.eyJwcmltYXJ5c2lkIjoi" +
             "MTU3NjA2MjY2Mzk2MjI3NTg0MCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUv" +
             "MDUvaWRlbnRpdHkvY2xhaW1zL3NpZCI6IkEyMTFcXHd1eGwxIiwidW5pcXVlX25hbWUiOiLlkL" +
@@ -21,6 +31,7 @@ object Constants {
 
 
     const val IMAGE_URL = "http://192.168.18.20/appku-api/public/storage/images/"
+
    // const val LOGIN_URL = "login"
     const val REGISTER_URL = "register"
     const val LOGOUT_URL = "logout"

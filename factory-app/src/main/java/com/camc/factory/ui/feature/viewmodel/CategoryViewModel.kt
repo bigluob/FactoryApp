@@ -64,5 +64,18 @@ class CategoryViewModel @Inject constructor(
             categoryRepository.deleteCategory(recordCategory)
         }
     }
+    private var editCategory: RecordCategory? = null
+    var onCategoryItemClick: ((index: Int, category: RecordCategory) -> Unit)? = null
+    fun onCategoryItemClick(index: Int, category: RecordCategory) {
+        // 处理项的点击事件
+        // 可以使用传递的索引和分类信息执行特定的操作
+        // 例如，更新当前选中的分类，显示详细信息等
+        editCategory = category
+    }
+
+    fun getEditCategory(): RecordCategory? {
+        return editCategory
+    }
+
 
 }

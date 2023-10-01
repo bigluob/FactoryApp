@@ -1,4 +1,4 @@
-package com.camc.base.extention
+package com.ujizin.camposer.extensions
 
 import android.content.Context
 import android.os.Build

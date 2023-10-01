@@ -1,4 +1,4 @@
-package com.camc.base.extention
+package com.camc.media.extensions
 
 val Int.minutes get() = (this / 60).toString().padStart(2, '0')
 

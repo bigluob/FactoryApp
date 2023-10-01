@@ -1,4 +1,4 @@
-package com.camc.base.extention
+package com.camc.media.extensions
 
 import android.app.RecoverableSecurityException
 import android.content.ContentResolver
@@ -17,9 +17,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
 @WorkerThread
 suspend fun File.getDuration(context: Context): Int? = withContext(Dispatchers.IO) {
     if (isVideo) {

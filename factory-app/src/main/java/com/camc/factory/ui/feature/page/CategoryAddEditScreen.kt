@@ -19,9 +19,11 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,16 +32,31 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.camc.factory.data.model.entity.RecordCategory
 import com.camc.factory.ui.feature.viewmodel.CategoryViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun TodoAddEditScreen(
+fun CategoryAddEditScreen(
     navController: NavController,
     viewModel: CategoryViewModel = hiltViewModel()
 ) {
     // 用于保存用户输入的文本字段的状态
     val categoryName = remember { mutableStateOf("") }
+    val descriptionState = remember { mutableStateOf("多媒体记录") }
+    val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
+
+    // 获取要编辑的分类数据
+    val editCategory = viewModel.getEditCategory()
+
+    // 初始化分类数据
+    if (editCategory != null) {
+        categoryName.value = editCategory.name
+        descriptionState.value = editCategory.description
+        // 其他字段的初始化
+    }
 
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
                 title = { Text("添加新分类") },
@@ -51,7 +68,8 @@ fun TodoAddEditScreen(
                     }
                 }
             )
-        }, content = {
+        },
+        content = {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -69,7 +87,7 @@ fun TodoAddEditScreen(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Column(
-                                modifier = Modifier.weight(3f)
+                                modifier = Modifier.weight(3f).padding(end = 32.dp)
                             ) {
                                 // Name input field
                                 TextField(
@@ -84,9 +102,9 @@ fun TodoAddEditScreen(
 
                                 // Description input field
                                 TextField(
-                                    value = viewModel.description,
+                                    value = descriptionState.value,
                                     onValueChange = { newValue ->
-                                        viewModel.description = newValue
+                                        descriptionState.value = newValue
                                     },
                                     label = { Text("记录内容描述") },
                                     modifier = Modifier.fillMaxWidth()
@@ -107,17 +125,18 @@ fun TodoAddEditScreen(
 
                             FloatingActionButton(
                                 onClick = {
-                                    if (viewModel.name.isNotBlank() && viewModel.description.isNotBlank() && viewModel.demandRecords > 0) {
+                                    if (viewModel.name.isNotBlank() && descriptionState.value.isNotBlank() && viewModel.demandRecords > 0) {
                                         val category = RecordCategory(
                                             name = viewModel.name,
-                                            description = viewModel.description,
+                                            description = descriptionState.value,
                                             demandRecords = viewModel.demandRecords
                                         )
                                         viewModel.addCategory(category)
                                         navController.popBackStack()
                                     } else {
-                                        // Show error message indicating missing fields
-                                        // You can display a Snackbar or any other appropriate error handling mechanism
+                                        coroutineScope.launch {
+                                            scaffoldState.snackbarHostState.showSnackbar("请填写完整的表单信息")
+                                        }
                                     }
                                 },
                                 modifier = Modifier

@@ -1,4 +1,4 @@
-package com.camc.base.extention
+package com.camc.media.extensions
 
 import androidx.annotation.WorkerThread
 import androidx.camera.core.ImageProxy

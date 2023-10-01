@@ -1,27 +1,27 @@
 package com.camc.factory.ui.feature.component
 
-
-import android.content.ContentResolver
-import android.content.ContentValues
+import android.content.Context
 import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.Environment
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,137 +31,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.camc.factory.data.network.file.MyFileUploadCallback
+import androidx.core.content.FileProvider
+import com.camc.factory.utils.CardColorUtil
 import com.camc.factory.utils.FileHelper
-import com.camc.factory.utils.FileUploader.uploadFiles
 import kotlinx.coroutines.launch
 import java.io.File
-
-/*@Composable
-fun CategoryItemComponent(
-    categoryName: String,
-    requiredCount: Int,
-    recordCount: Int,
-    isUploaded: Boolean,
-    onCameraClick: () -> Unit,
-    onUploadClick: () -> Unit
-) {
-    var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-    var photoPath by remember { mutableStateOf<String?>(null) }
-    val contentResolver = LocalContext.current.contentResolver // 初始化contentResolver
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-    var recordCount by remember { mutableStateOf(1) }
-
-    fun showToast(message: String) {
-        coroutineScope.launch {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun getOrCreateFolder(): File? {
-        val folder = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-            "Record"
-        )
-        if (!folder.exists()) {
-            val created = folder.mkdirs()
-            if (!created) {
-                return null
-            }
-        }
-        return folder
-    }
-
-    fun createSDCardFile(contentResolver: ContentResolver): Pair<Uri?, File?> {
-        val folder = getOrCreateFolder()
-        if (folder != null) {
-            val fileName = "photo${recordCount + 1}.jpg"
-            val file = File(folder, fileName)
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                put(MediaStore.MediaColumns.DATA, file.absolutePath)
-            }
-            val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-            if (uri == null) {
-                showToast("无法创建文件夹")
-            }
-            return Pair(uri, file)
-        } else {
-            showToast("无法创建文件夹")
-            return Pair(null, null)
-        }
-    }
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { isTaken ->
-            if (isTaken) {
-                val (uri, file) = createSDCardFile(contentResolver)
-                if (file != null) {
-                    val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                    imageBitmap = bitmap?.asImageBitmap()
-                    // 更新recordCount
-                    recordCount++
-                }
-            } else {
-                // 在这里处理拍照失败或取消的逻辑
-            }
-        }
-    )
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(3.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 左侧展示名称、要求数量和记录数量是否已上传
-            Column(
-                modifier = Modifier
-                    .weight(2f)
-                    .padding(6.dp)
-            ) {
-                Text(text = categoryName, fontWeight = FontWeight.Bold)
-                Text(text = "要求数量: $requiredCount")
-                Text(text = "记录数量: $recordCount")
-                Text(text = "已上传: ${if (isUploaded) "是" else "否"}")
-            }
-            Column(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .padding(2.dp)
-            ) {
-                IconButton(
-                    onClick = { onCameraClick() },
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PhotoCamera,
-                        contentDescription = "拍照"
-                    )
-                }
-            }
-            Column(modifier = Modifier.weight(0.5f)) {
-                IconButton(
-                    onClick = { onUploadClick() },
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CloudUpload,
-                        contentDescription = "上传"
-                    )
-                }
-            }
-        }
-    }
-}*/
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 @Composable
 fun CategoryItemComponent(
     categoryName: String,
@@ -169,151 +50,138 @@ fun CategoryItemComponent(
     recordCount: Int,
     isUploaded: Boolean,
     onCameraClick: () -> Unit,
-    onUploadClick: () -> Unit
+    onUploadClick: () -> Unit,
+    onItemClick: () -> Unit, // 添加此函数参数
 ) {
-    var imageCount by remember { mutableStateOf(0) }
+    val context = LocalContext.current
+    var imageCount by remember { mutableStateOf(recordCount) }
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-    var photoPath by remember { mutableStateOf<String?>(null) }
-    val contentResolver = LocalContext.current.contentResolver // 初始化contentResolver
-
-    fun getOrCreateFolder(): File? {
-        val folder = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-            "Record"
-        )
-        if (!folder.exists()) {
-            val created = folder.mkdirs()
-            if (!created) {
-                return null
-            }
-        }
-        // 获取文件夹下包含categoryName的图片列表
-        var imageList = folder.listFiles { file ->
-            file.name.startsWith(categoryName)
-        }?.toList() ?: emptyList()
-
-        return folder
+    val contentResolver = LocalContext.current.contentResolver
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+    val currentPhotoPath = remember { mutableStateOf<String?>(null) }
+    // 根据屏幕大小调整图标的大小
+    val iconSize = if (screenWidth > 600.dp) {
+        72.dp
+    } else {
+        48.dp
     }
+// 处理项的点击事件
 
-    val folder = getOrCreateFolder()
-    if (folder != null) {
-        imageCount = folder.listFiles { file ->
-            file.name.startsWith(categoryName)
-        }?.size ?: 0
-    }
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { isTaken ->
             if (isTaken) {
-                // 在这里处理拍照成功的逻辑
-                val bitmap = BitmapFactory.decodeFile(photoPath)
+                val folder = FileHelper.getOrCreateFolder(context, categoryName)
+                val currentDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+                val files = FileHelper.listFilesByCategory(folder?.path ?: "", categoryName)
+                val matchingFiles = files.filter { it.name.contains(categoryName) }
+                val existingImageCount = matchingFiles.size
+                val newPhotoFileName = "$categoryName$currentDate${existingImageCount + 1}.jpg"
+                val newPhotoPath = File(folder, newPhotoFileName).path
+                val newPhotoUri = FileProvider.getUriForFile(
+                    context,
+                    context.packageName + ".provider",
+                    File(newPhotoPath)
+                )
+                val bitmap = BitmapFactory.decodeFile(newPhotoPath)
                 imageBitmap = bitmap?.asImageBitmap()
-                // 更新recordCount和文件夹下包含categoryName的图片数量
-                // 更新 recordCount 的值
-
+                imageCount = existingImageCount + 1
             } else {
-                // 在这里处理拍照失败或取消的逻辑
+                // 处理拍照失败或取消的逻辑
+                showToast(context, "拍照失败或取消")
             }
         }
     )
+
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-    fun showToast(message: String) {
-        coroutineScope.launch {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        }
+    LaunchedEffect(Unit) {
+        FileHelper.getOrCreateFolder(context, categoryName)
     }
-
-    var imageList by remember { mutableStateOf<List<File>>(emptyList()) }
-
-
-    fun createSDCardFile(contentResolver: ContentResolver): Pair<Uri?, File?> {
-
-        if (folder != null) {
-            val fileName = "${categoryName}${imageCount + 1}.jpg"
-            val file = File(folder, fileName)
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                put(MediaStore.MediaColumns.DATA, file.absolutePath)
-            }
-            val uri =
-                contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-            if (uri == null) {
-                showToast("无法创建文件夹")
-            } else {
-
-            }
-            return Pair(uri, file)
-        } else {
-            showToast("无法创建文件夹")
-            return Pair(null, null)
-        }
-    }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(3.dp)
+            .padding(2.dp)
+            .clickable{onItemClick()},
+        backgroundColor = CardColorUtil.getCardColor(imageCount, requiredCount)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 左侧展示名称、要求数量和记录数量是否已上传
             Column(
                 modifier = Modifier
-                    .weight(2f)
-                    .padding(6.dp)
+                    .weight(3f)
+                    .padding(8.dp)
             ) {
                 Text(text = categoryName, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(text = "要求数量: $requiredCount")
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(text = "记录数量: $imageCount")
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(text = "已上传: ${if (isUploaded) "是" else "否"}")
             }
             Column(
                 modifier = Modifier
-                    .weight(0.5f)
-                    .padding(2.dp)
+                    .weight(1f)
+                    .padding(8.dp)
             ) {
                 IconButton(
                     onClick = {
-                        val photoUri = createSDCardFile(contentResolver).first
+                        val photoUri = FileHelper.createImageFile(
+                            categoryName,
+                            contentResolver
+                        )
                         if (photoUri != null) {
-                            photoPath = photoUri.toString() // 保存照片路径
+                            currentPhotoPath.value = photoUri.path
                             takePictureLauncher.launch(photoUri)
                         } else {
-                            showToast("无法创建临时文件")
+                            showToast(context, "无法创建临时文件")
                         }
                     },
                     modifier = Modifier.padding(8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PhotoCamera,
-                        contentDescription = "拍照"
+                        imageVector = Icons.Filled.PhotoCamera,
+                        contentDescription = "拍照",
+                        modifier = Modifier
+                            .size(iconSize)
+                            .padding(8.dp)
                     )
                 }
             }
 
-            Column(modifier = Modifier.weight(0.5f)) {
+            Column(modifier = Modifier.weight(1f)) {
                 IconButton(
-                    onClick = {
-                        // 在这里调用上传文件的函数，传递所需的参数
-
-                        val files: List<File> =
-                            FileHelper.listFilesByCategory(folder!!, categoryName) // 准备文件列表
-                        // val fileUploadCallback: FileUploadCallback = // 准备回调对象
-                        val fileUploadCallback = MyFileUploadCallback()
-                        uploadFiles(categoryName, files, context, fileUploadCallback)
-                    },
+                    onClick = onUploadClick,
                     modifier = Modifier.padding(8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.UploadFile,
-                        contentDescription = "上传"
+                        imageVector = Icons.Filled.FileUpload,
+                        contentDescription = "文件上传",
+                        modifier = Modifier
+                            .size(iconSize)
+                            .padding(8.dp)
                     )
                 }
             }
         }
     }
+
+    // Show toast message
+    LaunchedEffect(imageCount) {
+        if (imageCount == requiredCount) {
+            coroutineScope.launch {
+                showToast(context, "已达到要求数量")
+            }
+        }
+    }
 }
+
+fun showToast(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+}
+
+
