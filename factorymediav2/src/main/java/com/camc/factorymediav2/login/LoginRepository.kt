@@ -1,9 +1,12 @@
-package com.camc.factorymediav2
+package com.camc.factorymediav2.login
 
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class LoginRepository @Inject constructor(private val loginApiService: LoginApiService) {
-    // 定义登录请求函数，使用 Retrofit 发起登录请求
+    suspend fun login(username: String, password: String): LoginResponse {
+        val request = LoginRequest(username, password, "string", "string", "string")
+        return loginApiService.login(request)
+    }
 }

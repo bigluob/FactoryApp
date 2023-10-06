@@ -7,12 +7,11 @@ import javax.crypto.spec.SecretKeySpec
 class Constant {
     companion object {
         // 服务器地址和端口
-        const val API_BASE_URL = "http://82.157.66.177:8888"
-
-        // 固定的 API 路径
-        const val API_LOGIN_PATH = "/api/Login/"
-
-        const val API_UPLOAD_PATH = "/api/Common/SingleFileUpload/"
+        const val BASE_URL = "http://82.157.66.177:8888"
+        // 登录接口
+        const val LOGIN_PATH = "/api/Login/"
+        //文件上传接口
+        const val UPLOAD_PATH = "/api/Common/SingleFileUpload/"
 
         // 密钥
         private const val SECRET_KEY = "YourSecretKey"

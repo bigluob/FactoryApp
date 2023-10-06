@@ -25,7 +25,7 @@ fun ErrorImageAuth(
             Image(
                 painter = painterResource(id = R.drawable.ic_error_red),
                 contentDescription = "Image Error",
-                modifier = modifier.size(250.dp)
+                modifier = modifier.size(24.dp)
 
             )
         }

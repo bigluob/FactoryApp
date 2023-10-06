@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,7 +28,6 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.camc.common.utils.FileHelper2
 import com.camc.factory.component.MyImageComponent
-import com.camc.factory.data.network.file.MyFileUploadCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

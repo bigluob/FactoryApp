@@ -12,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.camc.factory.utils.SharedPrefsManager
 
 
 @Composable
@@ -51,7 +50,7 @@ fun ServerSettingsScreen(navController: NavController) {
                             putString("serverAddress", serverAddress)
                             apply()
                         }*/
-                        SharedPrefsManager.newInstance(context).putString("serverAddress", serverAddress)
+                       // SharedPrefsManager.newInstance(context).putString("serverAddress", serverAddress)
                         showDialogState.value = false
                     }
                 ) {

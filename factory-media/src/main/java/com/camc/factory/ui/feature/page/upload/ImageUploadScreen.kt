@@ -3,19 +3,17 @@ package com.camc.factory.ui.feature.page.upload
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -39,17 +37,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.camc.common.utils.FileHelper2
-import com.camc.factory.component.CustomProgressBar
 import com.camc.factory.component.MyImageComponent
-import com.camc.factory.data.network.file.MyFileUploadCallback
 import com.camc.factory.ui.feature.viewmodel.ImageUploadViewModel
-import com.camc.factory.utils.SharedPrefsManager
+import com.camc.factory.utils.SharedPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,22 +58,28 @@ fun ImageUploadScreen(
     navController: NavController,
     categoryName: String,
     context: Context,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    sharedPreferencesManager: SharedPreferencesManager // 通过依赖注入获得的实例
 ) {
     // 创建 ImageUploadViewModel
     val viewModel: ImageUploadViewModel = viewModel()
-    val fileUploadCallback = remember { MyFileUploadCallback(0) }
+    /*val fileUploadCallback = remember { MyFileUploadCallback(0) }*/
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
     // 在 ImageUploadScreen 顶部定义
     var selectedImageItems by remember { mutableStateOf<Set<File>>(emptySet()) }
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
     val uploadProgress by viewModel.uploadProgress.collectAsState()
+    val context = LocalContext.current
     // 创建 SharedPrefsManager 实例
-    val sharedPrefsManager = SharedPrefsManager.newInstance(context)
-    val token = sharedPrefsManager.getString("token", "")
-
+    sharedPreferencesManager.saveToken("eyJhbGciOiJub25lIiwidHlwIjoiQmVhcmVyIn0.eyJwcmltYXJ5c2lkIjoiMTU3NzU5NDcxNDE2ODgxOTcxMiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL3NpZCI6Ind1eGwxIiwidW5pcXVlX25hbWUiOiLlkLTmlrDlvZUiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3VzZXJkYXRhIjoie1wiVUlEXCI6XCIxNTc3NTk0NzE0MTY4ODE5NzEyXCIsXCJVc2VySURcIjpcInd1eGwxXCIsXCJVc2VyTmFtZVwiOlwi5ZC05paw5b2VXCIsXCJUZW5hbnRJRFwiOm51bGwsXCJUZW5hbnROYW1lXCI6bnVsbCxcIkRlcHRJRFwiOlwiMTU3NjIyMjUyMTg4NTc4MjAxNlwiLFwiRGVwdE5hbWVcIjpcIuS_oemYs-WIhuWFrOWPuFwiLFwiR3JvdXBJRFwiOlwiMTU5ODg5NDI5ODAwNjc4MTk1MlwiLFwiR3JvdXBOYW1lXCI6XCLnlJ_kuqfnrqHnkIbpg6hcIixcIkdyYWRlbGV2ZWxcIjpcIue7hOmVv1wiLFwiU2VjdXJpdHlOYW1lXCI6XCLlhazlvIBcIixcIlNlY3VyaXR5VmFsdWVcIjowLFwiUm9sZUlkc1wiOm51bGwsXCJSb2xlc1wiOm51bGwsXCJQZXJtaXNzaW9uc1wiOm51bGx9IiwiQXVkaWVuY2UiOiJEaVhpbi5QRE0iLCJJc3N1ZXIiOiJEaVhpbi5QRE0iLCJuYmYiOjE2OTY0ODkyMjQsImV4cCI6MTY5NjUzMjQyNCwiaWF0IjoxNjk2NDg5MjI0LCJpc3MiOiJEaVhpbi5QRE0iLCJhdWQiOiJEaVhpbi5QRE0ifQ.")
+    val token = sharedPreferencesManager.getToken()
     LaunchedEffect(Unit) {
+        if (token != null) {
+            if (token.isEmpty()) {
+                sharedPreferencesManager.saveToken("eyJhbGciOiJub25lIiwidHlwIjoiQmVhcmVyIn0.eyJwcmltYXJ5c2lkIjoiMTU3NzU5NDcxNDE2ODgxOTcxMiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL3NpZCI6Ind1eGwxIiwidW5pcXVlX25hbWUiOiLlkLTmlrDlvZUiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3VzZXJkYXRhIjoie1wiVUlEXCI6XCIxNTc3NTk0NzE0MTY4ODE5NzEyXCIsXCJVc2VySURcIjpcInd1eGwxXCIsXCJVc2VyTmFtZVwiOlwi5ZC05paw5b2VXCIsXCJUZW5hbnRJRFwiOm51bGwsXCJUZW5hbnROYW1lXCI6bnVsbCxcIkRlcHRJRFwiOlwiMTU3NjIyMjUyMTg4NTc4MjAxNlwiLFwiRGVwdE5hbWVcIjpcIuS_oemYs-WIhuWFrOWPuFwiLFwiR3JvdXBJRFwiOlwiMTU5ODg5NDI5ODAwNjc4MTk1MlwiLFwiR3JvdXBOYW1lXCI6XCLnlJ_kuqfnrqHnkIbpg6hcIixcIkdyYWRlbGV2ZWxcIjpcIue7hOmVv1wiLFwiU2VjdXJpdHlOYW1lXCI6XCLlhazlvIBcIixcIlNlY3VyaXR5VmFsdWVcIjowLFwiUm9sZUlkc1wiOm51bGwsXCJSb2xlc1wiOm51bGwsXCJQZXJtaXNzaW9uc1wiOm51bGx9IiwiQXVkaWVuY2UiOiJEaVhpbi5QRE0iLCJJc3N1ZXIiOiJEaVhpbi5QRE0iLCJuYmYiOjE2OTY0ODkyMjQsImV4cCI6MTY5NjUzMjQyNCwiaWF0IjoxNjk2NDg5MjI0LCJpc3MiOiJEaVhpbi5QRE0iLCJhdWQiOiJEaVhpbi5QRE0ifQ.")
+            }
+        }
         val result = withContext(Dispatchers.IO) {
             FileHelper2.listFilesByCategory(context, categoryName)
         }
@@ -105,7 +108,7 @@ fun ImageUploadScreen(
             ) {
                 // 在顶部显示选中的图片数量
                 Text(
-                    text = "选中的图片数量：${selectedImageItems.size}",
+                    text = "选中上传的图片数量：${selectedImageItems.size}",
                     modifier = Modifier.padding(16.dp)
                 )
 
@@ -114,15 +117,17 @@ fun ImageUploadScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    // 图片列表 Grid
-                    // 图片列表 Grid
-                    // 图片列表 Grid
                     LazyVerticalGrid(
                         cells = GridCells.Fixed(3),
                         modifier = Modifier.padding(16.dp)
                     ) {
                         itemsIndexed(files) { index, file ->
                             val isSelected = selectedImageItems.contains(file)
+                            val borderModifier = if (isSelected) {
+                                Modifier.border(2.dp, Color.Blue)
+                            } else {
+                                Modifier
+                            }
 
                             Image(
                                 painter = rememberImagePainter(file.toUri()),
@@ -131,26 +136,20 @@ fun ImageUploadScreen(
                                     .size(100.dp)
                                     .padding(4.dp)
                                     .clip(RoundedCornerShape(8.dp))
+                                    .then(borderModifier)
                                     .clickable {
-                                        // 当图片被点击时，切换选中状态
+                                        // 切换选中状态
                                         if (isSelected) {
-                                            selectedImageItems = selectedImageItems - file
+                                            selectedImageItems = selectedImageItems
+                                                .toMutableSet()
+                                                .apply { remove(file) }
                                         } else {
-                                            selectedImageItems = selectedImageItems + file
+                                            selectedImageItems = selectedImageItems
+                                                .toMutableSet()
+                                                .apply { add(file) }
                                         }
                                     }
                             )
-
-                            // 如果图片被选中，显示一个标记
-                            if (isSelected) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .background(Color.Blue)
-                                        .clip(CircleShape)
-                                        .align(Alignment.TopEnd)
-                                )
-                            }
                         }
                     }
                     // 上传按钮（FloatButton）位于右下角
@@ -190,18 +189,18 @@ fun ImageUploadScreen(
                 )
 
                 // 显示上传进度
-                Text(
-                    text = (fileUploadCallback.progressState * 100).toInt().toString() + "%",
-                    modifier = Modifier.padding(16.dp)
-                )
+                /* Text(
+                     text = (fileUploadCallback.progressState * 100).toInt().toString() + "%",
+                     modifier = Modifier.padding(16.dp)
+                 )
 
-                // 底部进度条
-                CustomProgressBar(
-                    progress = fileUploadCallback.progressState, // 使用上传进度作为进度条的进度
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                )
+                 // 底部进度条
+                 CustomProgressBar(
+                     progress = fileUploadCallback.progressState, // 使用上传进度作为进度条的进度
+                     modifier = Modifier
+                         .fillMaxWidth()
+                         .padding(16.dp)
+                 )*/
                 // 显示上传进度
                 Text(
                     text = "${(uploadProgress * 100).toInt()}%",

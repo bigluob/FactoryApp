@@ -19,7 +19,9 @@ dependencyResolutionManagement {
 }
 rootProject.name = "FactoryApp"
 include ':app'
-include ':MediaRecordApp'
-include ':factory-app'
-/*include ':camposer'
-include ':pluck'*/
+
+include ':factory-media'
+/*include ':factory-common'*/
+/*include ':MediaRecordApp'*/
+include ':factory-common'
+include ':factorymediav2'

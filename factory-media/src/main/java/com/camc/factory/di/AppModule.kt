@@ -1,11 +1,14 @@
 package com.camc.factory.di
 
 import android.app.Application
+import android.content.SharedPreferences
+import android.preference.PreferenceManager
 import androidx.room.Room
 import com.camc.factory.common.Constant
 import com.camc.factory.data.FactDatabase
 import com.camc.factory.data.local.datasource.FileDataSource
-import com.camc.factory.data.network.file.ApiService
+import com.camc.factory.data.network.FileUploadApi
+import com.camc.factory.data.network.LoginApi
 import com.camc.factory.data.repository.CategoryRepository
 import com.camc.factory.data.repository.CategoryRepositoryImpl
 import com.camc.factory.data.repository.RecordRepository
@@ -14,6 +17,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -21,17 +25,35 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
     @Provides
-    @Singleton // 可以根据需求选择作用域
-    fun provideApiService(): ApiService {
-        val baseUrl = Constant.API_BASE_URL
-        return Retrofit.Builder()
-            .baseUrl("$baseUrl${Constant.API_UPLOAD_PATH}")
-            .addConverterFactory(GsonConverterFactory.create())
+    @Singleton
+    fun provideRetrofit(): Retrofit {
+        val okHttpClient = OkHttpClient.Builder()
+            // 添加拦截器或其他配置
             .build()
-            .create(ApiService::class.java)
+        return Retrofit.Builder()
+            .baseUrl(Constant.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
     }
 
+    @Provides
+    fun provideLoginApi(retrofit: Retrofit): LoginApi {
+        return retrofit.create(LoginApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFileUploadApi(): FileUploadApi {
+        val baseUrl = "http://82.157.66.177:8888" // 您的服务器地址和端口
+        return Retrofit.Builder()
+            .baseUrl(Constant.BASE_URL) // 根据实际情况设置基本URL
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(FileUploadApi::class.java)
+    }
     @Provides
     @Singleton
     fun provideFactDatabase(app: Application): FactDatabase {
@@ -58,14 +80,10 @@ object AppModule {
     fun provideFileDataSource(): FileDataSource {
         return FileDataSource()
     }
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(app: Application): SharedPreferences {
+        return PreferenceManager.getDefaultSharedPreferences(app)
+    }
+
 }
-    /*  @Provides
-      @Singleton
-      fun provideCategoryUseCases(repository: CategoryRepository): CategoryUseCases {
-          return CategoryUseCases(
-              getCategorys = GetCategorys(repository),
-              deleteCategory = DeleteCategory(repository),
-              addCategory = AddCategory(repository),
-              getCategory = GetCategory(repository)
-          )
-      }*/

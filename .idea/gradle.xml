@@ -12,9 +12,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/MediaRecordApp" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/factory-app" />
+            <option value="$PROJECT_DIR$/factory-common" />
+            <option value="$PROJECT_DIR$/factory-media" />
+            <option value="$PROJECT_DIR$/factorymediav2" />
           </set>
         </option>
       </GradleProjectSettings>

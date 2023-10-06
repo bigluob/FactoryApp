@@ -1,4 +1,4 @@
-package com.camc.factory.ui.feature.viewmodel
+package com.camc.factorymediav2.files
 
 import android.net.Uri
 import androidx.lifecycle.LiveData

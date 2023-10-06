@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.camc.factory.data.network.file.ApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ImageUploadViewModel @Inject constructor(
-    private val apiService: ApiService // 注入 ApiService
+    //private val apiService: ApiService // 注入 ApiService
+
 ) : ViewModel() {
     // 选择的图像文件
     private val _selectedImageFile = MutableLiveData<Uri?>()
@@ -58,8 +58,7 @@ class ImageUploadViewModel @Inject constructor(
                 for (file in selectedImageFile) {
                     val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
                     val body = MultipartBody.Part.createFormData("formFile", file.name, requestFile)
-
-                    val response = apiService.uploadFile("Bearer $token", body)
+                  /* val response = apiService.uploadFile("Bearer $token", body)
                     if (response.isSuccessful) {
                         // 文件上传成功
                         _uploadProgress.value = 1.0f // 设置上传进度为100%
@@ -67,7 +66,7 @@ class ImageUploadViewModel @Inject constructor(
                     } else {
                         // 文件上传失败
                         _uploadResult.value = ResultStatus.Failure("文件上传失败")
-                    }
+                    }*/
                 }
             } catch (e: Exception) {
                 // 发生异常，文件上传失败

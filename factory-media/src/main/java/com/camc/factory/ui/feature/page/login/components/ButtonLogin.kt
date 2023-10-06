@@ -1,6 +1,6 @@
 package com.camc.factory.ui.feature.page.login.components
 
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
@@ -17,7 +17,7 @@ fun ButtonLogin(
 ) {
     Button(
         onClick = onclick,
-        modifier = Modifier.width(300.dp),
+        modifier = Modifier.fillMaxWidth(1f),
         elevation = ButtonDefaults.elevation(defaultElevation = 5.dp),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(

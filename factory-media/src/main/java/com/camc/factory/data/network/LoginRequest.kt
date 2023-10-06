@@ -1,4 +1,4 @@
-package com.camc.factory.data.network.login
+package com.camc.factory.data.network
 
 import retrofit2.http.Body
 import retrofit2.http.POST

@@ -23,6 +23,8 @@ import com.camc.factory.ui.feature.page.login.LoginScreen
 import com.camc.factory.ui.feature.page.upload.ImageUploadScreen
 import com.camc.factory.ui.feature.viewmodel.CaptureViewModel
 import com.camc.factory.ui.feature.viewmodel.LoginViewModel
+import com.camc.factory.ui.feature.viewmodel.LoginViewModelFactory
+import com.camc.factory.utils.SharedPreferencesManager
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -36,17 +38,21 @@ import java.util.concurrent.Executors
 fun HomeNavHost(context: Context) {
     val navController = rememberAnimatedNavController()
     val executor: Executor = Executors.newSingleThreadExecutor()
-    val loginViewModel: LoginViewModel = viewModel()
+    val sharedPreferencesManager = SharedPreferencesManager(context)
+    val loginViewModel: LoginViewModel = viewModel(
+        factory = LoginViewModelFactory(sharedPreferencesManager)
+    )
     val captureViewModel: CaptureViewModel = viewModel()
     val loadingProgressBar = loginViewModel.progressBar.value
     val imageError = loginViewModel.imageErrorAuth.value
+
     AnimatedNavHost(navController, startDestination = AppRouter.Category.route) {
         composable(AppRouter.Category.route) {
             Column() {
                 CategoryScreen(navController)
             }
         }
-        composable(route = AppRouter.Login.route) {
+        /*composable(route = AppRouter.Login.route) {
             if (loginViewModel.isSuccessLoading.value) {
                 LaunchedEffect(key1 = Unit) {
                     navController.navigate(route = AppRouter.Category.route) {
@@ -62,22 +68,34 @@ fun HomeNavHost(context: Context) {
                     imageError = imageError
                 )
             }
-        }
-       /* composable(
-            route = "${AppRouter.TakePhoto.route}/{${AppRouterParams.PAR_CATEGORY_TITLE}}",
-            arguments = listOf(
-                navArgument(AppRouterParams.PAR_CATEGORY_TITLE) {
-                    type = NavType.StringType
-                }
-            )
-        ) { entry ->
-            val categoryName = entry.arguments?.getString(AppRouterParams.PAR_CATEGORY_TITLE) ?: ""
-            CaptureScreen(
-                navController,
-                categoryName,
-                captureViewModel
-            )
         }*/
+        composable(route = AppRouter.Login.route) {
+            if (loginViewModel.isSuccessLoading.value) {
+                LaunchedEffect(key1 = Unit) {
+                    navController.navigate(route = AppRouter.Category.route) {
+                        popUpTo(route = AppRouter.Login.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            } else {
+                LoginScreen(
+                    loadingProgressBar = loadingProgressBar,
+                    onclickLogin = { username, password ->
+                        loginViewModel.login(username, password)
+                    },
+                    imageError = imageError,
+                    onLoginSuccess = { token ->
+                        // 登录成功后的操作
+                        navController.navigate(route = AppRouter.Category.route) {
+                            popUpTo(route = AppRouter.Login.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+        }
 
         composable(
             route = "${AppRouter.ImageFileUpload.route}/{${AppRouterParams.PAR_CATEGORY_TITLE}}",
@@ -94,7 +112,8 @@ fun HomeNavHost(context: Context) {
                 context = context,
                 navigateBack = {
                     navController.popBackStack() // 导航回上一页
-                }
+                },
+                sharedPreferencesManager = sharedPreferencesManager
             )
         }
         composable(

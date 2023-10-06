@@ -37,7 +37,7 @@ import com.camc.facttory.R
 import com.davidorellana.logincomposeretrofit2.ui.login.components.ProgressBarLoading
 
 @Composable
-fun LoginScreen(
+fun LoginScreen2(
     modifier: Modifier = Modifier,
     loadingProgressBar: Boolean,
     onclickLogin: (username: String, password: String) -> Unit,

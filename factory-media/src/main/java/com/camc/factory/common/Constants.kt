@@ -1,10 +1,5 @@
 package com.camc.factory.common
 
-import android.content.Context
-import android.os.Build
-import android.os.Environment
-import java.io.File
-
 object Constants {
 
 
@@ -31,6 +26,7 @@ object Constants {
 
 
     const val IMAGE_URL = "http://192.168.18.20/appku-api/public/storage/images/"
+    const val password = "http://192.168.18.20/appku-api/public/storage/images/"
 
    // const val LOGIN_URL = "login"
     const val REGISTER_URL = "register"
