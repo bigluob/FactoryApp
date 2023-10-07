@@ -1,4 +1,4 @@
-package com.camc.factory_components
+package com.camc.components
 
 import org.junit.Test
 

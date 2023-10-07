@@ -14,8 +14,9 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/factory-common" />
+            <option value="$PROJECT_DIR$/factory-components" />
             <option value="$PROJECT_DIR$/factory-media" />
-            <option value="$PROJECT_DIR$/factorymediav2" />
+            <option value="$PROJECT_DIR$/factoryv1" />
           </set>
         </option>
       </GradleProjectSettings>

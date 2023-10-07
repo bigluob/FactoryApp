@@ -1,4 +1,7 @@
-package com.camc.factory_client
+package com.camc.common.utils
+
+import android.content.Context
+import android.widget.Toast
 
 object ToastUtils {
     fun showToast(context: Context, message: String) {

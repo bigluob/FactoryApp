@@ -21,7 +21,8 @@ rootProject.name = "FactoryApp"
 include ':app'
 
 include ':factory-media'
-/*include ':factory-common'*/
-/*include ':MediaRecordApp'*/
+
 include ':factory-common'
-include ':factorymediav2'
+//include ':factoryv2'
+include ':factory-components'
+include ':factoryv1'

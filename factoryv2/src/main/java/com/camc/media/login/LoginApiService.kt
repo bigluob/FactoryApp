@@ -1,4 +1,4 @@
-package com.camc.factorymediav2.login
+package com.camc.media.login
 
 import retrofit2.http.Body
 import retrofit2.http.POST

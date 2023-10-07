@@ -4,6 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 
 @Composable
-fun SettingScreen(navController: NavHostController) {
+fun UploadScreen(navController: NavHostController) {
 
 }

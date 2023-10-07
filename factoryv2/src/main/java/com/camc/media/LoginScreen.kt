@@ -1,4 +1,4 @@
-package com.camc.factorymediav2
+package com.camc.media
 
 
 import android.widget.Toast
@@ -36,7 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.camc.factorymediav2.login.LoginViewModel
+import com.camc.media.login.LoginViewModel
 
 @Composable
 fun LoginScreen(

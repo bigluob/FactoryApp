@@ -1,6 +1,6 @@
-package com.camc.factorymediav2.di
+package com.camc.media.di
 
-import com.camc.factorymediav2.login.LoginApiService
+import com.camc.media.login.LoginApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

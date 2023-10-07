@@ -1,4 +1,4 @@
-package com.camc.factorymediav2.login
+package com.camc.media.login
 
 data class LoginRequest(
     val userName: String,

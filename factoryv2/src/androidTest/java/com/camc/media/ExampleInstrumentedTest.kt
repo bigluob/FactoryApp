@@ -1,4 +1,4 @@
-package com.camc.factorymediav2
+package com.camc.media
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

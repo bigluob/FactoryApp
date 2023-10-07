@@ -1,4 +1,4 @@
-package com.camc.factorymediav2
+package com.camc.media
 
 import org.junit.Test
 

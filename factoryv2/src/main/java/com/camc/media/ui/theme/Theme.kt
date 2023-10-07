@@ -1,4 +1,4 @@
-package com.camc.factorymediav2.ui.theme
+package com.camc.media.ui.theme
 
 import android.app.Activity
 import android.os.Build

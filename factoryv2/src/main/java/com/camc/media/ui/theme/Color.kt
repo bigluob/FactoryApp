@@ -1,4 +1,4 @@
-package com.camc.factorymediav2.ui.theme
+package com.camc.media.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

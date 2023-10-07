@@ -1,4 +1,4 @@
-package com.camc.factorymediav2.files
+package com.camc.media.files
 
 import android.net.Uri
 import androidx.lifecycle.LiveData

@@ -1,11 +1,11 @@
-package com.camc.factorymediav2
+package com.camc.media
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import com.camc.factorymediav2.login.LoginViewModel
-import com.camc.factorymediav2.ui.theme.FactoryAppTheme
+import com.camc.media.login.LoginViewModel
+import com.camc.media.ui.theme.FactoryAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
