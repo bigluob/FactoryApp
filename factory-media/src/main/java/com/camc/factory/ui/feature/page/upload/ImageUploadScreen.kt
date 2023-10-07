@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,12 +41,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.camc.common.utils.FileHelper2
 import com.camc.factory.component.MyImageComponent
 import com.camc.factory.ui.feature.viewmodel.ImageUploadViewModel
+import com.camc.factory.ui.feature.viewmodel.ResultStatus
 import com.camc.factory.utils.SharedPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,15 +64,17 @@ fun ImageUploadScreen(
     sharedPreferencesManager: SharedPreferencesManager // 通过依赖注入获得的实例
 ) {
     // 创建 ImageUploadViewModel
-    val viewModel: ImageUploadViewModel = viewModel()
+    val imageUploadViewModel: ImageUploadViewModel = hiltViewModel()
     /*val fileUploadCallback = remember { MyFileUploadCallback(0) }*/
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
     // 在 ImageUploadScreen 顶部定义
     var selectedImageItems by remember { mutableStateOf<Set<File>>(emptySet()) }
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
-    val uploadProgress by viewModel.uploadProgress.collectAsState()
     val context = LocalContext.current
+    val uploadProgress by imageUploadViewModel.uploadProgress.collectAsState()
+    val uploadResult by imageUploadViewModel.uploadResult.observeAsState()
+
     // 创建 SharedPrefsManager 实例
     sharedPreferencesManager.saveToken("eyJhbGciOiJub25lIiwidHlwIjoiQmVhcmVyIn0.eyJwcmltYXJ5c2lkIjoiMTU3NzU5NDcxNDE2ODgxOTcxMiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL3NpZCI6Ind1eGwxIiwidW5pcXVlX25hbWUiOiLlkLTmlrDlvZUiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3VzZXJkYXRhIjoie1wiVUlEXCI6XCIxNTc3NTk0NzE0MTY4ODE5NzEyXCIsXCJVc2VySURcIjpcInd1eGwxXCIsXCJVc2VyTmFtZVwiOlwi5ZC05paw5b2VXCIsXCJUZW5hbnRJRFwiOm51bGwsXCJUZW5hbnROYW1lXCI6bnVsbCxcIkRlcHRJRFwiOlwiMTU3NjIyMjUyMTg4NTc4MjAxNlwiLFwiRGVwdE5hbWVcIjpcIuS_oemYs-WIhuWFrOWPuFwiLFwiR3JvdXBJRFwiOlwiMTU5ODg5NDI5ODAwNjc4MTk1MlwiLFwiR3JvdXBOYW1lXCI6XCLnlJ_kuqfnrqHnkIbpg6hcIixcIkdyYWRlbGV2ZWxcIjpcIue7hOmVv1wiLFwiU2VjdXJpdHlOYW1lXCI6XCLlhazlvIBcIixcIlNlY3VyaXR5VmFsdWVcIjowLFwiUm9sZUlkc1wiOm51bGwsXCJSb2xlc1wiOm51bGwsXCJQZXJtaXNzaW9uc1wiOm51bGx9IiwiQXVkaWVuY2UiOiJEaVhpbi5QRE0iLCJJc3N1ZXIiOiJEaVhpbi5QRE0iLCJuYmYiOjE2OTY0ODkyMjQsImV4cCI6MTY5NjUzMjQyNCwiaWF0IjoxNjk2NDg5MjI0LCJpc3MiOiJEaVhpbi5QRE0iLCJhdWQiOiJEaVhpbi5QRE0ifQ.")
     val token = sharedPreferencesManager.getToken()
@@ -80,6 +84,7 @@ fun ImageUploadScreen(
                 sharedPreferencesManager.saveToken("eyJhbGciOiJub25lIiwidHlwIjoiQmVhcmVyIn0.eyJwcmltYXJ5c2lkIjoiMTU3NzU5NDcxNDE2ODgxOTcxMiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL3NpZCI6Ind1eGwxIiwidW5pcXVlX25hbWUiOiLlkLTmlrDlvZUiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3VzZXJkYXRhIjoie1wiVUlEXCI6XCIxNTc3NTk0NzE0MTY4ODE5NzEyXCIsXCJVc2VySURcIjpcInd1eGwxXCIsXCJVc2VyTmFtZVwiOlwi5ZC05paw5b2VXCIsXCJUZW5hbnRJRFwiOm51bGwsXCJUZW5hbnROYW1lXCI6bnVsbCxcIkRlcHRJRFwiOlwiMTU3NjIyMjUyMTg4NTc4MjAxNlwiLFwiRGVwdE5hbWVcIjpcIuS_oemYs-WIhuWFrOWPuFwiLFwiR3JvdXBJRFwiOlwiMTU5ODg5NDI5ODAwNjc4MTk1MlwiLFwiR3JvdXBOYW1lXCI6XCLnlJ_kuqfnrqHnkIbpg6hcIixcIkdyYWRlbGV2ZWxcIjpcIue7hOmVv1wiLFwiU2VjdXJpdHlOYW1lXCI6XCLlhazlvIBcIixcIlNlY3VyaXR5VmFsdWVcIjowLFwiUm9sZUlkc1wiOm51bGwsXCJSb2xlc1wiOm51bGwsXCJQZXJtaXNzaW9uc1wiOm51bGx9IiwiQXVkaWVuY2UiOiJEaVhpbi5QRE0iLCJJc3N1ZXIiOiJEaVhpbi5QRE0iLCJuYmYiOjE2OTY0ODkyMjQsImV4cCI6MTY5NjUzMjQyNCwiaWF0IjoxNjk2NDg5MjI0LCJpc3MiOiJEaVhpbi5QRE0iLCJhdWQiOiJEaVhpbi5QRE0ifQ.")
             }
         }
+        val token = sharedPreferencesManager.getToken() ?: ""
         val result = withContext(Dispatchers.IO) {
             FileHelper2.listFilesByCategory(context, categoryName)
         }
@@ -159,7 +164,7 @@ fun ImageUploadScreen(
                             if (selectedImageItems.isNotEmpty()) {
                                 // 执行上传操作，使用 ViewModel 处理上传
                                 if (token != null) {
-                                    viewModel.uploadImage(selectedImageItems, token)
+                                    imageUploadViewModel.uploadImage(selectedImageItems, token)
                                 }
                             } else {
                                 // 如果没有选中图片，显示错误消息
@@ -188,19 +193,23 @@ fun ImageUploadScreen(
                         .clip(RoundedCornerShape(8.dp))
                 )
 
-                // 显示上传进度
-                /* Text(
-                     text = (fileUploadCallback.progressState * 100).toInt().toString() + "%",
-                     modifier = Modifier.padding(16.dp)
-                 )
-
-                 // 底部进度条
-                 CustomProgressBar(
-                     progress = fileUploadCallback.progressState, // 使用上传进度作为进度条的进度
-                     modifier = Modifier
-                         .fillMaxWidth()
-                         .padding(16.dp)
-                 )*/
+                // 显示上传结果
+                if (uploadResult != null) {
+                    when (uploadResult) {
+                        is ResultStatus.Success -> {
+                            Text(
+                                text = "上传成功: ${(uploadResult as ResultStatus.Success).message}",
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                        is ResultStatus.Failure -> {
+                            Text(
+                                text = "上传失败: ${(uploadResult as ResultStatus.Failure).error}",
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+                }
                 // 显示上传进度
                 Text(
                     text = "${(uploadProgress * 100).toInt()}%",

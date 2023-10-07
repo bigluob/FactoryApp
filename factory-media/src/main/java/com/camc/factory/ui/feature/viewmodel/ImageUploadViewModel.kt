@@ -5,20 +5,23 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.camc.factory.data.network.FileUploadApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class ImageUploadViewModel @Inject constructor(
-    //private val apiService: ApiService // 注入 ApiService
-
+    // 注入 ApiService
+    private val fileUploadApi: FileUploadApi
 ) : ViewModel() {
     // 选择的图像文件
     private val _selectedImageFile = MutableLiveData<Uri?>()
@@ -29,11 +32,9 @@ class ImageUploadViewModel @Inject constructor(
     private val _uploadProgress = MutableStateFlow(0.0f)
     val uploadProgress: StateFlow<Float> = _uploadProgress
 
-
     // 上传结果
     private val _uploadResult = MutableLiveData<ResultStatus>()
-    val uploadResult: LiveData<ResultStatus>
-        get() = _uploadResult
+    val uploadResult: LiveData<ResultStatus> = _uploadResult
 
     // 选择图像文件
     fun selectImageFile(uri: Uri) {
@@ -44,8 +45,6 @@ class ImageUploadViewModel @Inject constructor(
     fun uploadImage(selectedImageFile: Set<File>, token: String) {
         // 执行图像上传逻辑，包括网络请求、进度更新等
         // 更新上传进度和上传结果
-        // 执行图像上传逻辑，包括网络请求、进度更新等
-        // 更新上传进度和上传结果
         _uploadProgress.value = 0.0f // 设置初始进度
         _uploadResult.value = ResultStatus.InProgress // 设置上传中状态
 
@@ -53,26 +52,50 @@ class ImageUploadViewModel @Inject constructor(
         // 在上传过程中，更新 _uploadProgress
         // 在上传完成或失败时，更新 _uploadResult
         viewModelScope.launch {
-            try {
-                // 上传文件，将 Token 作为请求头传递
+            viewModelScope.launch {
                 for (file in selectedImageFile) {
-                    val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-                    val body = MultipartBody.Part.createFormData("formFile", file.name, requestFile)
-                  /* val response = apiService.uploadFile("Bearer $token", body)
-                    if (response.isSuccessful) {
-                        // 文件上传成功
-                        _uploadProgress.value = 1.0f // 设置上传进度为100%
-                        _uploadResult.value = ResultStatus.Success("文件上传成功")
-                    } else {
-                        // 文件上传失败
+                    try {
+                        val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                        val filePart =
+                            MultipartBody.Part.createFormData("formFile", file.name, requestFile)
+                        val description =
+                            RequestBody.create(
+                                "text/plain".toMediaTypeOrNull(),
+                                "Image Description"
+                            )
+
+                        val response = fileUploadApi.uploadFile(token, filePart, description)
+
+                        if (response.isSuccessful) {
+                            val fileUploadResponse = response.body()
+                            if (fileUploadResponse != null && fileUploadResponse.isSuccess) {
+                                _uploadResult.value = ResultStatus.Success("文件上传成功")
+                            } else {
+                                _uploadResult.value =
+                                    ResultStatus.Failure("文件上传失败: ${fileUploadResponse?.returnMsg}")
+                            }
+                        } else {
+                            _uploadResult.value = ResultStatus.Failure("文件上传失败")
+                        }
+                    } catch (e: Exception) {
                         _uploadResult.value = ResultStatus.Failure("文件上传失败")
-                    }*/
+                    } catch (e: Exception) {
+                        // Exception occurred during file upload
+                        _uploadResult.value =
+                            ResultStatus.Failure("File upload failed: ${e.message}")
+                    }
                 }
-            } catch (e: Exception) {
-                // 发生异常，文件上传失败
-                _uploadResult.value = ResultStatus.Failure("文件上传失败")
             }
 
+
+        }
+    }
+
+    fun String.toMediaTypeOrNull(): MediaType? {
+        return try {
+            this.toMediaType()
+        } catch (e: IllegalArgumentException) {
+            null
         }
     }
 

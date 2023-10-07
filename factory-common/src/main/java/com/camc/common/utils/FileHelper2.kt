@@ -9,6 +9,7 @@ import android.provider.MediaStore
 import java.io.File
 
 object FileHelper2 {
+
     private var folder: File? = null
 
     fun getOrCreateFolder(context: Context, categoryName: String): String? {
@@ -28,7 +29,7 @@ object FileHelper2 {
     suspend fun listFilesByCategory(context: Context, categoryName: String): Pair<List<File>, Int> {
         val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
         val files = folder.listFiles { dir, name ->
-            name.startsWith("$categoryName(") && name.endsWith(").jpg")
+            name.startsWith("$categoryName(")
         }
         return if (folder.exists() && folder.isDirectory) {
             val files = folder.listFiles()?.filter { file ->
@@ -52,14 +53,12 @@ object FileHelper2 {
         val imageCount = getImageCount(categoryName)
         val fileName = "${categoryName}${imageCount}.jpg"
         val file = File(folder, fileName)
-
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             put(MediaStore.MediaColumns.DATA, file.absolutePath)
         }
         val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-
         return uri
     }
 }

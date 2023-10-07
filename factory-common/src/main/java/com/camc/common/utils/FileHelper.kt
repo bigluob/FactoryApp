@@ -1,64 +1,66 @@
 package com.camc.common.utils
 
+import android.content.ContentResolver
+import android.content.ContentValues
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
-import androidx.core.content.FileProvider
+import android.provider.MediaStore
 import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
 
 class FileHelper(private val context: Context) {
 
-    private val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-    val storageDir by lazy {
-        val dir = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-            "FactMediaRecord"
-        )
-        if (!dir.exists() && !dir.mkdirs()) {
-            // 处理目录创建失败的情况
-            throw IOException("无法创建目录")
+    private var folder: File? = null
+
+    fun getOrCreateFolder(context: Context, categoryName: String): String? {
+        val mediaRecordDir = File(context.getExternalFilesDir(Environment.DIRECTORY_DCIM), "MediaRecord")
+        val categoryDir = File(mediaRecordDir, categoryName)
+
+        if (!categoryDir.exists()) {
+            val created = categoryDir.mkdirs()
+            if (!created) {
+                return null
+            }
         }
-        dir
+        folder = categoryDir // 将创建的文件夹赋值给全局变量
+        return categoryDir.absolutePath
     }
-
-
-    init {
-        if (!storageDir.exists()) {
-            storageDir.mkdirs()
+    // 在 FileHelper 类中修改 listFilesByCategory 方法
+    suspend fun listFilesByCategory(context: Context, categoryName: String): Pair<List<File>, Int> {
+        val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val files = folder.listFiles { dir, name ->
+            name.startsWith("$categoryName(") && name.endsWith(").jpg")
+        }
+        return if (folder.exists() && folder.isDirectory) {
+            val files = folder.listFiles()?.filter { file ->
+                file.name.startsWith(categoryName)
+            } ?: emptyList()
+            Pair(files, files.size)
+        } else {
+            Pair(emptyList(), 0)
         }
     }
 
-    // 创建子文件夹
-    fun createSubFolder(categoryName: String): File {
-        val subFolder = File(storageDir, categoryName)
-        if (!subFolder.exists()) {
-            subFolder.mkdirs()
+
+    fun getImageCount(categoryName: String): Int {
+        val imageList = folder?.listFiles { file ->
+            file.name.startsWith(categoryName)
         }
-        return subFolder
+        return imageList?.size ?: 0
     }
 
-    // 读取文件列表
-    fun getMediaFiles(categoryName: String): List<File> {
-        val subFolder = createSubFolder(categoryName)
-        return subFolder.listFiles()?.toList() ?: emptyList()
-    }
+    fun createImageFile(categoryName: String, contentResolver: ContentResolver): Uri? {
+        val imageCount = getImageCount(categoryName)
+        val fileName = "${categoryName}${imageCount}.jpg"
+        val file = File(folder, fileName)
 
-    // 创建照片文件
-    @Throws(IOException::class)
-    fun createImageFile(categoryName: String): File {
-        // 这里可以使用 fileHelper 来获取 categoryName 等信息
-        val subFolder = createSubFolder(categoryName)
-        val imageFileName = "IMG_${categoryName}_${dateFormat.format(Date())}".replace(":", "_")
-        val imageFile = File.createTempFile(imageFileName, ".jpg", subFolder)
-        return imageFile
-    }
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.DATA, file.absolutePath)
+        }
+        val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
-    // 获取拍照意图，通过 FileProvider 获取 URI
-    fun getCaptureImageIntent(imageFile: File): Pair<File, String> {
-        val authority = "${context.packageName}.fileprovider"
-        val uri = FileProvider.getUriForFile(context, authority, imageFile)
-        return Pair(imageFile, uri.toString())
+        return uri
     }
 }
